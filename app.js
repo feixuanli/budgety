@@ -48,7 +48,17 @@ var budgetController = (function(){
             //return the new item
             return newItem; 
         },
-        calculateBudget: function(){
+        deleteItem: function(type, id) {
+            var ids, index; 
+            var ids = data.allItems[type].map(function(cur) {
+                return cur.id;
+            })
+            index  = ids.indexOf(id);
+            if(index !== -1) {
+                data.allItems[type].splice(index, 1);
+            }
+        },
+        calculateBudget: function() {
             //calculate total income and expenses
             calculateTotal('exp');
             calculateTotal('inc');
@@ -119,10 +129,16 @@ var UIController = (function() {
             //3, insert html into dom 
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
          },
+         deleteListItem: function(selectorID) {
+            var elem = document.getElementById(selectorID);
+            elem.parentNode.removeChild(elem);
+         },
          clearFields: function() {
             var fields, fieldsArray, 
             fields = document.querySelectorAll(DOMStrings.inputDesc + ', ' + DOMStrings.inputValue);
+            console.log('fields', fields);
             fieldsArray = Array.prototype.slice.call(fields);
+            console.log('fieldsArray', fieldsArray);
             fieldsArray.forEach(function(cur, index, array) {
                 cur.value = '';
             });
@@ -158,14 +174,17 @@ var controller = (function(budgetCtrl, UICtrl) {
     }
 
     var ctrlDeleteItem = function(event) {
-        var itemId = event.target.parentNode.parentNode.parentNode.parentNode.id;// hard coded dom structure here 
-        if(itemId) {
+        var itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;// hard coded dom structure here 
+        if(itemID) {
             //inc-1
             var splitID, type, ID;
             splitID = itemID.split('-');
             type = splitID[0];
-            ID = splitID[i];
+            ID = parseInt(splitID[1]);
             // delete item from data structure 
+            budgetCtrl.deleteItem(type, ID);
+            UICtrl.deleteListItem(itemID);
+            updateBudget();
             // delelte item from UI
             //update and show new budget 
         }
